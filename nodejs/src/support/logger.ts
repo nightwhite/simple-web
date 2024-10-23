@@ -5,8 +5,7 @@
  * @Description:
  */
 
-import { Console } from './engine'
-
+import { Console } from './engine/console'
 /**
  * The global logger instance
  */

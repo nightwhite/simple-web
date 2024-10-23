@@ -44,7 +44,7 @@ export class Console {
             loc = loc === 'default_1' ? 'MAIN' : loc
             location = chalk.gray(`(${loc}:${line})`)
           }
-        } catch {}
+        } catch { }
       }
     }
 

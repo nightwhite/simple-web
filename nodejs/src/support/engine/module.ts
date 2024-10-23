@@ -3,16 +3,11 @@ import { FunctionCache, FunctionModuleGlobalContext } from '.'
 import Config from '../../config'
 import { Console } from '.'
 import * as vm from 'vm'
-import { createRequire } from 'node:module'
 import * as path from 'node:path'
-import { ObjectId } from 'mongodb'
 
-export const CUSTOM_DEPENDENCY_NODE_MODULES_PATH = `${Config.CUSTOM_DEPENDENCY_BASE_PATH}/node_modules/`
 
 export class FunctionModule {
   protected static cache: Map<string, any> = new Map()
-
-  static customRequire = createRequire(CUSTOM_DEPENDENCY_NODE_MODULES_PATH)
 
   static get(functionName: string): any {
     const moduleName = `@/${functionName}`
@@ -54,7 +49,7 @@ export class FunctionModule {
       if (!data) {
         throw new Error(`function ${fn} not found`)
       }
-      const mod = this.compile(fn, data.source.compiled, fromModule)
+      const mod = this.compile(fn, data.compiledCode, fromModule)
 
       // cache module
       if (!Config.DISABLE_MODULE_CACHE) {
@@ -63,12 +58,7 @@ export class FunctionModule {
       return mod
     }
 
-    // load custom dependency from custom dependency path first
-    try {
-      return FunctionModule.customRequire(moduleName)
-    } catch (e) {
-      return require(moduleName)
-    }
+    return require(moduleName)
   }
 
   /**
@@ -126,12 +116,7 @@ export class FunctionModule {
         _: vm.Script,
         _importAssertions: any,
       ) => {
-        try {
-          const resolvedPath = FunctionModule.customRequire.resolve(specifier)
-          return await import(resolvedPath)
-        } catch (e) {
-          return await import(specifier)
-        }
+        return await import(specifier)
       },
     } as any
 
@@ -174,7 +159,6 @@ export class FunctionModule {
       fetch: globalThis.fetch,
       global: null,
       __from_modules: [...__from_modules],
-      ObjectId: ObjectId,
     }
     sandbox.global = sandbox
     return sandbox

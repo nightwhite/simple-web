@@ -1,60 +1,23 @@
 import { ICloudFunctionData } from './types'
 import { logger } from '../logger'
-import { DatabaseAgent } from '../../db'
-import { CLOUD_FUNCTION_COLLECTION } from '../../constants'
 import { InitHook } from '../init-hook'
-import { DatabaseChangeStream } from '../database-change-stream'
-import { FunctionModule } from './module'
-import { ChangeStreamDocument } from 'mongodb'
+import path from 'path'
+import fs from 'fs'
+import { compileTs2js } from '../utils'
 
+const WORKSPACE_PATH = path.join(__dirname, '../../functions')
 export class FunctionCache {
   private static cache: Map<string, ICloudFunctionData> = new Map()
 
-  static async initialize(): Promise<void> {
+  static initialize(): void {
     logger.info('initialize function cache')
-    const funcs = await DatabaseAgent.db
-      .collection<ICloudFunctionData>(CLOUD_FUNCTION_COLLECTION)
-      .find()
-      .toArray()
 
-    for (const func of funcs) {
-      FunctionCache.cache.set(func.name, func)
-    }
+    this.initializeFromWorkspace()
 
-    DatabaseChangeStream.onStreamChange(
-      CLOUD_FUNCTION_COLLECTION,
-      FunctionCache.streamChange.bind(this),
-    )
     logger.info('Function cache initialized.')
 
     // invoke init function
     InitHook.invoke()
-  }
-
-  /**
-   * stream the change of cloud function
-   * @param change
-   * @returns
-   */
-  private static async streamChange(
-    change: ChangeStreamDocument<ICloudFunctionData>,
-  ): Promise<void> {
-    if (change.operationType === 'insert') {
-      const func = await DatabaseAgent.db
-        .collection<ICloudFunctionData>(CLOUD_FUNCTION_COLLECTION)
-        .findOne({ _id: change.documentKey._id })
-
-      // add func in map
-      FunctionCache.cache.set(func.name, func)
-    } else if (change.operationType == 'delete') {
-      FunctionModule.deleteCache()
-      // remove this func
-      for (const [funcName, func] of this.cache) {
-        if (change.documentKey._id.equals(func._id)) {
-          FunctionCache.cache.delete(funcName)
-        }
-      }
-    }
   }
 
   static get(name: string): ICloudFunctionData {
@@ -63,5 +26,43 @@ export class FunctionCache {
 
   static getAll(): ICloudFunctionData[] {
     return Array.from(FunctionCache.cache.values())
+  }
+
+  private static initializeFromWorkspace(): void {
+    const stack = [WORKSPACE_PATH]
+
+    while (stack.length > 0) {
+      const currentDir = stack.pop()
+      const entries = fs.readdirSync(currentDir, { withFileTypes: true })
+
+      for (const entry of entries) {
+        const fullPath = path.join(currentDir, entry.name)
+        if (entry.isDirectory()) {
+          stack.push(fullPath)
+        } else if (entry.isFile() && entry.name.endsWith('.ts')) {
+          // Read the TypeScript file content
+          const fileContent = fs.readFileSync(fullPath, 'utf8')
+
+          // Calculate relative path from WORKSPACE_PATH and remove .ts extension
+          const relativePath = path.relative(WORKSPACE_PATH, fullPath)
+          const name = relativePath.replace(/\.ts$/, '')
+          // Compile the TypeScript code to JavaScript
+          const compiledCode = compileTs2js(fileContent, name)
+          // Create the cloud function data object
+          const cloudFunction: ICloudFunctionData = {
+            name,
+            code: fileContent,
+            compiledCode
+          }
+          // console.log('++++++++++++++++++++++++++++++++++++')
+          console.log(cloudFunction.name)
+          // console.log(cloudFunction.code)
+          // console.log('--------------------------------')
+          // console.log(cloudFunction.compiledCode)
+          // console.log('++++++++++++++++++++++++++++++++++++')
+          FunctionCache.cache.set(cloudFunction.name, cloudFunction)
+        }
+      }
+    }
   }
 }

@@ -3,7 +3,6 @@ import { nanosecond2ms } from '../utils'
 import { INTERCEPTOR_FUNCTION_NAME } from '../../constants'
 import { FunctionModule } from './module'
 import assert from 'assert'
-import { DebugConsole } from './console'
 import { logger } from '../logger'
 
 export class FunctionExecutor {
@@ -37,7 +36,7 @@ export class FunctionExecutor {
 
       let data = null
       if (this.data.name === INTERCEPTOR_FUNCTION_NAME) {
-        data = await main(context, () => {})
+        data = await main(context, () => { })
       } else if (useInterceptor) {
         data = await this.invokeWithInterceptor(context, main)
       } else {
@@ -98,24 +97,6 @@ export class FunctionExecutor {
 
   protected getModule() {
     const mod = FunctionModule.get(this.data.name)
-    return mod
-  }
-}
-
-export class FunctionDebugExecutor extends FunctionExecutor {
-  protected consoleInstance: DebugConsole
-
-  constructor(data: ICloudFunctionData, consoleInstance: DebugConsole) {
-    super(data)
-    this.consoleInstance = consoleInstance
-  }
-  /**
-   * @override override to
-   */
-  protected getModule() {
-    const name = this.data.name
-    const code = this.data.source.compiled
-    const mod = FunctionModule.compile(name, code, [], this.consoleInstance)
     return mod
   }
 }

@@ -1,6 +1,5 @@
 import { IncomingHttpHeaders } from 'http'
 import { Request, Response } from 'express'
-import { ObjectId } from 'mongodb'
 import WebSocket = require('ws')
 
 export type RequireFuncType = (
@@ -32,7 +31,6 @@ export interface FunctionModuleGlobalContext {
   global: FunctionModuleGlobalContext
   __from_modules: string[]
   fetch: typeof globalThis.fetch
-  ObjectId: typeof ObjectId
 }
 
 /**
@@ -72,30 +70,14 @@ export enum FunctionStatus {
  * Model CloudFunctionSource
  *
  */
-export type CloudFunctionSource = {
-  code: string
-  compiled: string | null
-  uri: string | null
-  version: number
-  hash: string | null
-  lang: string | null
-}
 
 /**
  * cloud function data structure
  */
 export interface ICloudFunctionData {
-  _id?: ObjectId
-  id: string
-  appid: string
   name: string
-  source: CloudFunctionSource
-  desc: string
-  tags: string[]
-  methods: string[]
-  createdAt: Date
-  updatedAt: Date
-  createdBy: string
+  code: string
+  compiledCode: string
 }
 
 /** Object containing file metadata and access information. */

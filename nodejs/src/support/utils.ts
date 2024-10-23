@@ -1,4 +1,5 @@
 import * as crypto from 'crypto'
+import * as ts from 'typescript'
 import { IRequest } from './types'
 
 /**
@@ -133,3 +134,21 @@ export function GetClientIPFromRequest(req: IRequest) {
 
   return null
 }
+
+export function compileTs2js(source: string, name: string) {
+  const jscode = ts.transpile(
+    source,
+    {
+      module: ts.ModuleKind.NodeNext,
+      target: ts.ScriptTarget.ESNext,
+      removeComments: true,
+      inlineSourceMap: true,
+    },
+    `${name}.ts`,
+    undefined,
+    name,
+  )
+
+  return jscode
+}
+

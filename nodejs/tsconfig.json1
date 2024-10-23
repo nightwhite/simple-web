@@ -8,9 +8,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "importHelpers": true,
-    "module": "NodeNext",
+    "module": "Node16",
     "target": "ES2022",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node16",
     "declarationMap": true,
     // "declarationDir": "types",
     "noEmitOnError": false,
@@ -26,15 +26,13 @@
     "skipLibCheck": true,
     "alwaysStrict": true,
     "lib": [
-      "ESNext"
+      "ES2022"
     ]
   },
   "include": [
     "src/**/*",
   ],
   "exclude": [
-    "node_modules",
-    "dist",
     "tests",
   ]
 }

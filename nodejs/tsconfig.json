@@ -9,7 +9,7 @@
     "emitDecoratorMetadata": true,
     "importHelpers": true,
     "module": "NodeNext",
-    "target": "ES2022",
+    "target": "ESNext",
     "moduleResolution": "NodeNext",
     "declarationMap": true,
     // "declarationDir": "types",

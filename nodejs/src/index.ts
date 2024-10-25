@@ -1,101 +1,122 @@
-import express from 'express'
+import type { Server } from 'http'
+
 import cors from 'cors'
-
-import Config from './config'
-import { router } from './handler/router'
-import { logger } from './support/logger'
-import { GetClientIPFromRequest, generateUUID } from './support/utils'
-import { WebSocketAgent } from './support/ws'
+import dotenv from 'dotenv'
+import type { Express, Request, Response, NextFunction } from 'express'
+import express from 'express'
 import xmlparser from 'express-xml-bodyparser'
+import sourceMapSupport from 'source-map-support'
 
+import Config from '@/config/Config.js'
+import { FunctionCache } from '@/engine/cache/FunctionCache.js'
+import { router } from '@/handler/router.js'
+import { WebSocketAgent } from '@/handler/ws.js'
+import type { SimpleWebConfig } from '@/types/simple-web-config.js'
+import { GetClientIPFromRequest } from '@/utils/common.js'
+import { systemLogger } from '@/utils/logger.js'
 
-import { FunctionCache } from './support/engine'
-
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error(`Caught unhandledRejection:`, reason, promise)
-})
-
-process.on('uncaughtException', (err) => {
-  logger.error(`Caught uncaughtException:`, err)
-})
-
-console.log('1')
-FunctionCache.initialize()
-console.log('2')
-require('source-map-support').install({
+sourceMapSupport.install({
   emptyCacheBetweenOperations: true,
   overrideRetrieveFile: true,
   retrieveFile: (path) => FunctionCache.get(path)?.compiledCode,
 })
 
-const app = express()
+dotenv.config()
 
-app.use(
-  cors({
-    origin: true,
-    methods: '*',
-    exposedHeaders: '*',
-    credentials: true,
-    maxAge: 86400,
-  }),
-)
-// fix x-real-ip while gateway not set
-app.use((req, _res, next) => {
-  if (!req.headers['x-real-ip']) {
-    req.headers['x-real-ip'] = GetClientIPFromRequest(req)
+export class SimpleWeb {
+  private app: Express
+  private server!: Server
+
+  constructor(private userConfig: SimpleWebConfig = {}) {
+    Config.initialize(userConfig)
+    this.app = express()
+    this.setupMiddlewares()
+    this.setupRoutes()
   }
-  next()
-})
 
-app.use(express.json({ limit: Config.REQUEST_LIMIT_SIZE }) as any)
+  private setupMiddlewares() {
+    this.app.use(
+      cors({
+        origin: true,
+        methods: '*',
+        exposedHeaders: '*',
+        credentials: true,
+        maxAge: 86400,
+      }),
+    )
 
-app.use(
-  express.urlencoded({
-    limit: Config.REQUEST_LIMIT_SIZE,
-    extended: true,
-  }) as any,
-)
+    this.app.use((req: Request, _res: Response, next: NextFunction) => {
+      if (!req.headers['x-real-ip']) {
+        const clientIP = GetClientIPFromRequest(req)
+        if (clientIP) {
+          req.headers['x-real-ip'] = clientIP
+        }
+      }
+      next()
+    })
 
-app.use(
-  express.raw({
-    limit: Config.REQUEST_LIMIT_SIZE,
-  }) as any,
-)
+    this.app.use(express.json({ limit: Config.REQUEST_LIMIT_SIZE }))
 
-app.use(xmlparser())
+    this.app.use(
+      express.urlencoded({
+        limit: Config.REQUEST_LIMIT_SIZE,
+        extended: true,
+      }),
+    )
 
+    this.app.use(
+      express.raw({
+        limit: Config.REQUEST_LIMIT_SIZE,
+      }),
+    )
 
+    this.app.use(xmlparser())
+  }
 
-/**
- * Parsing bearer token
- */
-app.use(function (req, res, next) {
-  const requestId = (req['requestId'] =
-    req.headers['x-request-id'] || generateUUID())
-  res.set('request-id', requestId)
-  next()
-})
+  private setupRoutes() {
+    this.app.use(router)
+  }
 
-app.use(router)
+  private setupErrorHandling() {
+    process.on('unhandledRejection', (reason, promise) => {
+      systemLogger.error(`Caught unhandledRejection:`, reason, promise)
+    })
 
-const server = app.listen(Config.PORT, () =>
-  logger.info(`server ${process.pid} listened on ${Config.PORT}`),
-)
+    process.on('uncaughtException', (err) => {
+      systemLogger.error(`Caught uncaughtException:`, err)
+    })
 
-/**
- * WebSocket upgrade & connect
- */
-server.on('upgrade', (req, socket, head) => {
-  WebSocketAgent.server.handleUpgrade(req, socket as any, head, (client) => {
-    WebSocketAgent.server.emit('connection', client, req)
-  })
-})
+    process.on('SIGTERM', this.gracefullyExit.bind(this))
+    process.on('SIGINT', this.gracefullyExit.bind(this))
+  }
 
-process.on('SIGTERM', gracefullyExit)
-process.on('SIGINT', gracefullyExit)
+  private setupWebSocket() {
+    this.server.on('upgrade', (req, socket, head) => {
+      WebSocketAgent.server.handleUpgrade(req, socket, head, (client) => {
+        WebSocketAgent.server.emit('connection', client, req)
+      })
+    })
+  }
 
-async function gracefullyExit() {
-  server.close()
-  logger.info('process gracefully exited!')
-  process.exit(0)
+  private gracefullyExit() {
+    this.server.close(() => {
+      systemLogger.info('process gracefully exited!')
+      process.exit(0)
+    })
+  }
+
+  public start() {
+    FunctionCache.initialize()
+    this.setupErrorHandling()
+
+    this.server = this.app.listen(Config.PORT, () =>
+      systemLogger.info(`server ${process.pid} listened on ${Config.PORT}`),
+    )
+
+    this.setupWebSocket()
+
+    systemLogger.info('SimpleWeb framework started.')
+  }
 }
+
+export default SimpleWeb

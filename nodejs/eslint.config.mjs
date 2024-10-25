@@ -1,11 +1,71 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import tseslint from "typescript-eslint";
-
+import pluginJs from '@eslint/js'
+import prettier from 'eslint-config-prettier'
+import pluginImport from 'eslint-plugin-import'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
 export default [
-  {files: ["**/*.{js,mjs,cjs,ts}"]},
-  {languageOptions: { globals: globals.browser }},
+  {
+    files: ['**/*.{js,mjs,ts}'],
+    languageOptions: {
+      globals: globals.node,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+  },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
-];
+  {
+    plugins: {
+      import: pluginImport,
+    },
+    settings: {
+      'import/parsers': {
+        '@typescript-eslint/parser': ['.ts'],
+      },
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
+        },
+        node: {
+          extensions: ['.js', '.mjs', '.ts'],
+        },
+      },
+    },
+    rules: {
+      'import/no-unresolved': 'error',
+      'import/first': 'error',
+      'import/no-duplicates': 'error',
+      'import/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'always',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+        },
+      ],
+      'import/newline-after-import': 'error',
+    },
+  },
+  {
+    files: ['**/*.ts'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
+  prettier,
+]

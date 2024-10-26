@@ -104,8 +104,8 @@ export class FunctionModule {
         return compiledModule
       }
 
-      // @ts-expect-error: Dynamic import returns Promise
-      return import(moduleName)
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      return require(moduleName)
     } catch (error) {
       if (currentFileName === '') {
         throw new Error(`#### Failed to require module ${currentFileName}: ${error}`)

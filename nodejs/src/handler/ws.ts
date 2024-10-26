@@ -2,11 +2,11 @@ import type { Request } from 'express'
 import type { WebSocket } from 'ws'
 import { WebSocketServer } from 'ws'
 
-import { WEBSOCKET_FUNCTION_NAME } from '@/constants/function-name.js'
-import { FunctionModule } from '@/engine/module/FunctionModule.js'
-import type { FunctionContext } from '@/types/functions.js'
-import { generateUUID } from '@/utils/common.js'
-import { systemLogger } from '@/utils/logger.js'
+import { WEBSOCKET_FUNCTION_NAME } from '../constants/function-name.js'
+import { FunctionModule } from '../engine/module/FunctionModule.js'
+import type { FunctionContext } from '../types/functions.js'
+import { generateUUID } from '../utils/common.js'
+import { systemLogger } from '../utils/logger.js'
 
 export class WebSocketAgent {
   private static _server: WebSocketServer | null = null

@@ -3,7 +3,7 @@ import path from 'path'
 
 import dotenv from 'dotenv'
 
-import type { SimpleWebConfig } from '@/types/simple-web-config.js'
+import type { SimpleWebConfig } from '../types/simple-web-config.js'
 
 dotenv.config()
 

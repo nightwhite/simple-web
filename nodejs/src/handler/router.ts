@@ -4,8 +4,9 @@ import { Router } from 'express'
 import type { Request, Response } from 'express'
 import multer from 'multer'
 
-import { handleInvokeFunction } from '@/handler/invoke.js'
-import { generateUUID } from '@/utils/common.js'
+import { generateUUID } from '../utils/common.js'
+
+import { handleInvokeFunction } from './invoke.js'
 
 /**
  * multer uploader config
@@ -35,7 +36,7 @@ router.get('/_/healthz', (_req, res) => {
  * @method *
  */
 // router.all('/:name', uploader.any(), handleInvokeFunction)
-router.all('*', uploader.any(), (req: Request, res: Response) => {
+router.all('*', uploader.any(), async (req: Request, res: Response): Promise<void> => {
   let funcName = req.path
 
   // remove the leading slash
@@ -53,5 +54,7 @@ router.all('*', uploader.any(), (req: Request, res: Response) => {
   }
 
   req.params.name = funcName
-  handleInvokeFunction(req, res, funcName)
+  console.log('invoke function')
+  await handleInvokeFunction(req, res, funcName)
+  return
 })

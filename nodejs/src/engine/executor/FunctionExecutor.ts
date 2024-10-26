@@ -1,9 +1,9 @@
 import assert from 'assert'
 
-import { INTERCEPTOR_FUNCTION_NAME } from '@/constants/function-name.js'
-import { FunctionModule } from '@/engine/module/FunctionModule.js'
-import type { FunctionContext, FunctionResult, IFunctionData } from '@/types/functions.js'
-import { nanosecond2ms } from '@/utils/common.js'
+import { INTERCEPTOR_FUNCTION_NAME } from '../../constants/function-name.js'
+import type { FunctionContext, FunctionResult, IFunctionData } from '../../types/functions.js'
+import { nanosecond2ms } from '../../utils/common.js'
+import { FunctionModule } from '../module/FunctionModule.js'
 
 export class FunctionExecutor {
   /**
@@ -21,6 +21,7 @@ export class FunctionExecutor {
     try {
       const mod = this.getModule()
       const main = mod.default || mod.main
+      console.log('execute function')
       if (!main) {
         throw new Error('FunctionExecutionError: `main` function not found')
       }
@@ -31,20 +32,28 @@ export class FunctionExecutor {
 
       let data = null
       if (this.data.name === INTERCEPTOR_FUNCTION_NAME) {
+        console.log('execute interceptor')
         data = await main(context, () => {})
       } else if (useInterceptor) {
+        console.log('execute interceptor with interceptor')
         data = await this.invokeWithInterceptor(context, main)
       } else {
+        console.log('execute function without interceptor')
+        // data = await Promise.resolve(main(context))
+        // data = main(context)
         data = await main(context)
+        console.log(data)
       }
 
       const endTime = process.hrtime.bigint()
       const timeUsage = nanosecond2ms(endTime - startTime)
+      console.log('execute function end')
       return {
         data,
         time_usage: timeUsage,
       }
     } catch (error) {
+      console.log('execute function error')
       const endTime = process.hrtime.bigint()
       const timeUsage = nanosecond2ms(endTime - startTime)
 

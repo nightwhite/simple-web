@@ -1,15 +1,14 @@
 import fs from 'fs'
 import path from 'path'
 
-import Config from '@/config/Config.js'
-import { InitHook } from '@/engine/hooks/init-hook.js'
-import type { IFunctionData } from '@/types/functions.js'
-import { compileTs2js } from '@/utils/lang.js'
-import { systemLogger } from '@/utils/logger.js'
+import Config from '../../config/Config.js'
+import type { IFunctionData } from '../../types/functions.js'
+import { compileTs2js } from '../../utils/lang.js'
+import { systemLogger } from '../../utils/logger.js'
+import { InitHook } from '../hooks/init-hook.js'
 
 export class FunctionCache {
   private static cache: Map<string, IFunctionData> = new Map()
-  private static WORKSPACE_PATH = Config.WORKSPACE_PATH
 
   static initialize(): void {
     systemLogger.info('initialize function cache')
@@ -31,7 +30,7 @@ export class FunctionCache {
   }
 
   private static initializeFromWorkspace(): void {
-    const stack = [this.WORKSPACE_PATH]
+    const stack = [Config.WORKSPACE_PATH]
 
     while (stack.length > 0) {
       const currentDir = stack.pop()
@@ -47,7 +46,7 @@ export class FunctionCache {
           const fileContent = fs.readFileSync(fullPath, 'utf8')
 
           // Calculate relative path from WORKSPACE_PATH and remove .ts extension
-          const relativePath = path.relative(this.WORKSPACE_PATH, fullPath)
+          const relativePath = path.relative(Config.WORKSPACE_PATH, fullPath)
           const name = relativePath.replace(/\.ts$/, '')
           // Compile the TypeScript code to JavaScript
           const compiledCode = compileTs2js(fileContent, name)

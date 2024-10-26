@@ -3,9 +3,9 @@ import * as path from 'node:path'
 import * as vm from 'vm'
 import type { Script, Context, RunningScriptInNewContextOptions, ScriptOptions } from 'vm'
 
-import Config from '@/config/Config.js'
-import { FunctionCache } from '@/engine/cache/FunctionCache.js'
-import { Console } from '@/utils/logger.js'
+import Config from '../../config/Config.js'
+import { Console } from '../../utils/logger.js'
+import { FunctionCache } from '../cache/FunctionCache.js'
 
 interface ModuleExports {
   [key: string]: any
@@ -231,7 +231,7 @@ export class FunctionModule {
         strings: true,
         wasm: true,
       },
-      microtaskMode: 'afterEvaluate',
+      // microtaskMode: 'afterEvaluate',
     }
   }
 

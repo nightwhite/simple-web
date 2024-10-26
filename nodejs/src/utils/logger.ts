@@ -1,10 +1,10 @@
 import * as util from 'util'
 
 import chalk from 'chalk'
-import { padStart } from 'lodash'
+import lodash from 'lodash'
 
-import Config from '@/config/Config.js'
-import type { SimpleWebConfig } from '@/types/simple-web-config.js'
+import Config from '../config/Config.js'
+import type { SimpleWebConfig } from '../types/simple-web-config.js'
 
 const enum LogLevel {
   DEBUG = 'debug',
@@ -16,7 +16,6 @@ const enum LogLevel {
 type LogLevelValue = {
   readonly [K in LogLevel]: number
 }
-
 export class Console {
   protected readonly category: string
   protected readonly config: SimpleWebConfig
@@ -35,7 +34,7 @@ export class Console {
 
   protected _format(level: LogLevel, ...params: unknown[]): string {
     const time = chalk.gray(new Date().toISOString())
-    let levelStr = padStart(level, 5, ' ')
+    let levelStr = lodash.padStart(level, 5, ' ')
     levelStr = level === LogLevel.INFO ? chalk.gray(levelStr) : this._colorize(level, levelStr)
 
     const fn = chalk.blueBright(`[${this.category}]`)

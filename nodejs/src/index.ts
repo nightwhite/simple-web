@@ -5,21 +5,15 @@ import dotenv from 'dotenv'
 import type { Express, Request, Response, NextFunction } from 'express'
 import express from 'express'
 import xmlparser from 'express-xml-bodyparser'
-import sourceMapSupport from 'source-map-support'
+// import sourceMapSupport from 'source-map-support'
 
-import Config from '@/config/Config.js'
-import { FunctionCache } from '@/engine/cache/FunctionCache.js'
-import { router } from '@/handler/router.js'
-import { WebSocketAgent } from '@/handler/ws.js'
-import type { SimpleWebConfig } from '@/types/simple-web-config.js'
-import { GetClientIPFromRequest } from '@/utils/common.js'
-import { systemLogger } from '@/utils/logger.js'
-
-sourceMapSupport.install({
-  emptyCacheBetweenOperations: true,
-  overrideRetrieveFile: true,
-  retrieveFile: (path) => FunctionCache.get(path)?.compiledCode,
-})
+import Config from './config/Config.js'
+import { FunctionCache } from './engine/cache/FunctionCache.js'
+import { router } from './handler/router.js'
+import { WebSocketAgent } from './handler/ws.js'
+import type { SimpleWebConfig } from './types/simple-web-config.js'
+import { GetClientIPFromRequest } from './utils/common.js'
+import { systemLogger } from './utils/logger.js'
 
 dotenv.config()
 
@@ -28,7 +22,9 @@ export class SimpleWeb {
   private server!: Server
 
   constructor(private userConfig: SimpleWebConfig = {}) {
+    console.log('1111')
     Config.initialize(userConfig)
+    console.log(Config.WORKSPACE_PATH)
     this.app = express()
     this.setupMiddlewares()
     this.setupRoutes()
@@ -86,8 +82,8 @@ export class SimpleWeb {
       systemLogger.error(`Caught uncaughtException:`, err)
     })
 
-    process.on('SIGTERM', this.gracefullyExit.bind(this))
-    process.on('SIGINT', this.gracefullyExit.bind(this))
+    process.on('SIGTERM', this.exit.bind(this))
+    process.on('SIGINT', this.exit.bind(this))
   }
 
   private setupWebSocket() {
@@ -98,11 +94,10 @@ export class SimpleWeb {
     })
   }
 
-  private gracefullyExit() {
-    this.server.close(() => {
-      systemLogger.info('process gracefully exited!')
-      process.exit(0)
-    })
+  private exit() {
+    this.server.close()
+    systemLogger.info('simple web exited!')
+    process.exit(0)
   }
 
   public start() {
@@ -114,6 +109,13 @@ export class SimpleWeb {
     )
 
     this.setupWebSocket()
+
+    // sourceMapSupport.install({
+    //   environment: 'node',
+    //   emptyCacheBetweenOperations: true,
+    //   overrideRetrieveFile: true,
+    //   retrieveFile: (path) => FunctionCache.get(path)?.compiledCode,
+    // })
 
     systemLogger.info('SimpleWeb framework started.')
   }

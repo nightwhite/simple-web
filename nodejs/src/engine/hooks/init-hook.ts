@@ -1,7 +1,7 @@
-import { INIT_FUNCTION_NAME } from '@/constants/function-name.js'
-import { FunctionCache } from '@/engine/cache/FunctionCache.js'
-import { FunctionExecutor } from '@/engine/executor/FunctionExecutor.js'
-import { systemLogger } from '@/utils/logger.js'
+import { INIT_FUNCTION_NAME } from '../../constants/function-name.js'
+import { systemLogger } from '../../utils/logger.js'
+import { FunctionCache } from '../cache/FunctionCache.js'
+import { FunctionExecutor } from '../executor/FunctionExecutor.js'
 
 /**
  * Init hook for `__init__` cloud function

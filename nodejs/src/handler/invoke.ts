@@ -1,12 +1,12 @@
 import type { Request, Response } from 'express'
 
-import Config from '@/config/Config.js'
-import { DEFAULT_FUNCTION_NAME, INTERCEPTOR_FUNCTION_NAME } from '@/constants/function-name.js'
-import { FunctionCache } from '@/engine/cache/FunctionCache.js'
-import { FunctionExecutor } from '@/engine/executor/FunctionExecutor.js'
-import type { FunctionContext } from '@/types/functions.js'
-import { generateUUID } from '@/utils/common.js'
-import { Console } from '@/utils/logger.js'
+import Config from '../config/Config.js'
+import { DEFAULT_FUNCTION_NAME, INTERCEPTOR_FUNCTION_NAME } from '../constants/function-name.js'
+import { FunctionCache } from '../engine/cache/FunctionCache.js'
+import { FunctionExecutor } from '../engine/executor/FunctionExecutor.js'
+import type { FunctionContext } from '../types/functions.js'
+import { generateUUID } from '../utils/common.js'
+import { Console } from '../utils/logger.js'
 
 export async function handleInvokeFunction(
   req: Request,
@@ -29,8 +29,8 @@ export async function handleInvokeFunction(
   if (!FunctionCache.get(INTERCEPTOR_FUNCTION_NAME)) {
     useInterceptor = false
   }
-
-  return await invokeFunction(ctx, useInterceptor)
+  await invokeFunction(ctx, useInterceptor)
+  return
 }
 
 // invoke cloud function
@@ -73,6 +73,8 @@ async function invokeFunction(ctx: FunctionContext, useInterceptor: boolean): Pr
       if (typeof result.data === 'number') {
         data = Number(result.data).toString()
       }
+      console.log(data)
+      console.log('invoke function send')
       ctx.response!.send(data)
       return
     }

@@ -1,3 +1,0 @@
-https://tsconfig.guide/
-
-pnpm exec tsc --init

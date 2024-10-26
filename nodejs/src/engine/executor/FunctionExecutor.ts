@@ -21,7 +21,7 @@ export class FunctionExecutor {
     try {
       const mod = this.getModule()
       const main = mod.default || mod.main
-      console.log('execute function')
+
       if (!main) {
         throw new Error('FunctionExecutionError: `main` function not found')
       }
@@ -36,11 +36,12 @@ export class FunctionExecutor {
         data = await main(context, () => {})
       } else if (useInterceptor) {
         console.log('execute interceptor with interceptor')
-        data = await this.invokeWithInterceptor(context, main)
+        data = await this.invokeWithInterceptor(
+          context,
+          (ctx: FunctionContext) => main(ctx) as Promise<unknown>,
+        )
       } else {
         console.log('execute function without interceptor')
-        // data = await Promise.resolve(main(context))
-        // data = main(context)
         data = await main(context)
         console.log(data)
       }
@@ -69,22 +70,38 @@ export class FunctionExecutor {
     next?: (context: FunctionContext) => Promise<unknown>,
   ) {
     const mod = FunctionModule.get(INTERCEPTOR_FUNCTION_NAME)
+    if (!mod) {
+      throw new Error(`FunctionExecutionError: Module '${INTERCEPTOR_FUNCTION_NAME}' not found`)
+    }
     const interceptor = mod.default || mod.main
+
     if (!interceptor) {
-      throw new Error('FunctionExecutionError: `__interceptor__` function not found')
+      throw new Error(
+        `FunctionExecutionError: main function '${INTERCEPTOR_FUNCTION_NAME}' not found`,
+      )
     }
 
     if (typeof interceptor !== 'function') {
-      throw new Error('FunctionExecutionError: `__interceptor__` function must be callable')
+      throw new Error(
+        `FunctionExecutionError: Function '${INTERCEPTOR_FUNCTION_NAME}' must be callable`,
+      )
     }
 
-    if (interceptor.length === 2) {
-      return interceptor(context, next)
+    // interceptor must have 2 arguments one is context and the other is next function
+    if (interceptor.length !== 2) {
+      throw new Error(
+        `FunctionExecutionError: Function '${INTERCEPTOR_FUNCTION_NAME}' must have 2 arguments`,
+      )
     }
+
+    return await interceptor(context, next)
   }
 
   protected getModule() {
     const mod = FunctionModule.get(this.data.name)
+    if (!mod) {
+      throw new Error(`FunctionExecutionError: Module '${this.data.name}' not found`)
+    }
     return mod
   }
 }

@@ -1,24 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as path from 'node:path'
-import * as vm from 'vm'
-import type { Script, Context, RunningScriptInNewContextOptions, ScriptOptions } from 'vm'
+import * as vm from 'node:vm'
+import type { Context, RunningScriptInNewContextOptions, ScriptOptions } from 'node:vm'
 
 import Config from '../../config/Config.js'
 import { Console } from '../../utils/logger.js'
 import { FunctionCache } from '../cache/FunctionCache.js'
 
-interface ModuleExports {
-  [key: string]: any
-}
-
 interface Module {
-  exports: ModuleExports
+  exports: Record<string, unknown>
 }
 
 interface FunctionModuleGlobalContext {
   __filename: string
   module: Module
-  exports: ModuleExports
+  exports: Module['exports']
   console: Console
   __require: typeof FunctionModule.require
   RegExp: typeof RegExp
@@ -40,7 +35,7 @@ interface FunctionModuleGlobalContext {
 
 export class FunctionModule {
   // Cache for loaded modules
-  private static moduleCache: Map<string, any> = new Map()
+  private static moduleCache: Map<string, Module['exports']> = new Map()
 
   /**
    * Get a function module by name
@@ -48,7 +43,7 @@ export class FunctionModule {
    * @returns Module exports
    * @throws Error if function not found
    */
-  static get(functionName: string): any {
+  static get(functionName: string): Module['exports'] | void {
     if (!functionName) {
       throw new Error('Function name is required')
     }
@@ -64,7 +59,11 @@ export class FunctionModule {
    * @returns Module exports
    * @throws Error if module not found or circular dependency detected
    */
-  static require(moduleName: string, fromModule: string[], currentFileName: string): any {
+  static require(
+    moduleName: string,
+    fromModule: string[],
+    currentFileName: string,
+  ): Module['exports'] | void {
     try {
       // Handle cloud SDK imports
       if (moduleName === '@/cloud-sdk') {
@@ -105,13 +104,13 @@ export class FunctionModule {
         return compiledModule
       }
 
-      // Handle external modules
+      // @ts-expect-error: Dynamic import returns Promise
       return import(moduleName)
     } catch (error) {
       if (currentFileName === '') {
-        throw new Error(`Failed to require module ${currentFileName}: ${error}`)
+        throw new Error(`#### Failed to require module ${currentFileName}: ${error}`)
       } else {
-        throw new Error(`${currentFileName}: Failed to require module ${moduleName}: ${error}`)
+        throw new Error(`#### ${currentFileName}: Failed to require module ${moduleName}: ${error}`)
       }
     }
   }
@@ -134,6 +133,9 @@ export class FunctionModule {
 
   /**
    * Resolve module path from module name
+   * @param moduleName The name of the module being imported
+   * @param currentFilename The filename of the current module
+   * @returns The resolved filename of the imported module
    */
   private static resolveModulePath(moduleName: string, filename: string): string {
     if (moduleName.startsWith('@/')) {
@@ -173,52 +175,34 @@ export class FunctionModule {
     code: string,
     fromModules: string[],
     consoleInstance?: Console,
-  ): any {
+  ): Module['exports'] {
     try {
-      // 使用 RunningScriptInNewContextOptions 运行脚本
       const runningOptions = this.createRunningOptions(functionName)
-      // 使用 ScriptOptions 创建脚本
       const scriptOptions = this.createScriptOptions(functionName)
       const sandbox = this.buildSandbox(functionName, fromModules, consoleInstance)
       const wrappedCode = this.wrap(code)
 
       const script = new vm.Script(wrappedCode, scriptOptions)
+      // script.runInNewContext return the result of the very last statement executed in the script.
       return script.runInNewContext(sandbox, runningOptions)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
-      throw new Error(`Failed to compile ${functionName}: ${errorMessage}`)
+      throw new Error(`#### Failed to compile ${functionName}: ${errorMessage}`)
     }
   }
 
   /**
-   * 创建脚本编译选项
+   * Create script compilation options
    */
   private static createScriptOptions(filename: string): ScriptOptions {
     return {
       filename,
-      // @ts-expect-error Types are incompatible but the implementation is correct
-      importModuleDynamically: async (
-        specifier: string,
-        _script: Script,
-        _importAttributes: ImportAttributes,
-      ): Promise<any> => {
-        // if (this.isLocalModule(specifier)) {
-        //   // Resolve and require local modules dynamically
-        //   // filename 是当前的文件名, specifier 是 import 的模块名, 所以需要使用 filename 来 resolve 模块路径,
-        //   const resolvedModule = this.resolveModulePath(specifier, filename)
-        //   // TODO: use __from_modules
-        //   return this.require(resolvedModule, global.__from_modules, filename)
-        // } else {
-        //   // Dynamically import external modules
-        //   return import(specifier)
-        // }
-        return import(specifier)
-      },
+      importModuleDynamically: vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER,
     }
   }
 
   /**
-   * 创建脚本运行时选项
+   * Create script runtime options
    */
   private static createRunningOptions(filename: string): RunningScriptInNewContextOptions {
     return {

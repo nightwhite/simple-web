@@ -32,7 +32,7 @@ router.get('/_/healthz', (_req, res) => {
 })
 
 /**
- * Invoke cloud function through HTTP request.
+ * Invoke function through HTTP request.
  * @method *
  */
 // router.all('/:name', uploader.any(), handleInvokeFunction)

@@ -79,7 +79,12 @@ async function handleWebSocketEvent(
   }
 
   const module = FunctionModule.get(WEBSOCKET_FUNCTION_NAME)
-  const handler = module.default || module.main || module
+
+  if (!module) {
+    throw new Error(`FunctionExecutionError: Module '${WEBSOCKET_FUNCTION_NAME}' not found`)
+  }
+
+  const handler = module.default || module.main
   if (typeof handler === 'function') {
     await handler(param)
   } else {

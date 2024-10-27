@@ -95,7 +95,7 @@ export class FunctionModule {
           systemLogger.warn(
             `#### Function ${fn} not found, try to load from local and node_modules`,
           )
-          return require(fn)
+          return require(moduleName)
           // throw new Error(`Function ${fn} not found`)
         }
 

@@ -4,7 +4,7 @@ import path from 'path'
 import Config from '../../config/Config'
 import type { IFunctionData } from '../../types/functions'
 import { compileTs2js } from '../../utils/lang'
-import { systemLogger } from '../../utils/logger.js'
+import { systemLogger } from '../../utils/logger'
 import { InitHook } from '../hooks/init-hook'
 
 export class FunctionCache {

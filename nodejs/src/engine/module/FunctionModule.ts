@@ -249,6 +249,7 @@ export class FunctionModule {
       module: _module,
       exports: _module.exports,
       console: fConsole,
+      // hack for functions import
       __require: this.functionsImport.bind(this),
       RegExp: RegExp,
       Buffer: Buffer,

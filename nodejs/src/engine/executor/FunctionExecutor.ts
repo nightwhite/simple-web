@@ -22,6 +22,12 @@ export class FunctionExecutor {
       const mod = this.getModule()
       const main = mod.default || mod.main
 
+      // TODO: add HTTP method support
+      // reject while no HTTP enabled
+      // if (!func.methods.includes(ctx.request.method.toUpperCase())) {
+      //   return ctx.response.status(405).send('Method Not Allowed')
+      // }
+
       if (!main) {
         throw new Error('FunctionExecutionError: `main` function not found')
       }
@@ -31,30 +37,30 @@ export class FunctionExecutor {
       }
 
       let data = null
-      if (this.data.name === INTERCEPTOR_FUNCTION_NAME) {
-        console.log('execute interceptor')
-        data = await main(context, () => {})
-      } else if (useInterceptor) {
-        console.log('execute interceptor with interceptor')
-        data = await this.invokeWithInterceptor(
-          context,
-          (ctx: FunctionContext) => main(ctx) as Promise<unknown>,
-        )
-      } else {
-        console.log('execute function without interceptor')
-        data = await main(context)
-        console.log(data)
+
+      switch (true) {
+        case this.data.name === INTERCEPTOR_FUNCTION_NAME:
+          data = await main(context, () => {})
+          break
+
+        case useInterceptor:
+          data = await this.invokeWithInterceptor(
+            context,
+            (ctx: FunctionContext) => main(ctx) as Promise<unknown>,
+          )
+          break
+
+        default:
+          data = await main(context)
       }
 
       const endTime = process.hrtime.bigint()
       const timeUsage = nanosecond2ms(endTime - startTime)
-      console.log('execute function end')
       return {
         data,
         time_usage: timeUsage,
       }
     } catch (error) {
-      console.log('execute function error')
       const endTime = process.hrtime.bigint()
       const timeUsage = nanosecond2ms(endTime - startTime)
 

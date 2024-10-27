@@ -47,11 +47,6 @@ async function invokeFunction(ctx: FunctionContext, useInterceptor: boolean): Pr
       return
     }
   }
-  // TODO: add HTTP method support
-  // reject while no HTTP enabled
-  // if (!func.methods.includes(ctx.request.method.toUpperCase())) {
-  //   return ctx.response.status(405).send('Method Not Allowed')
-  // }
 
   const logger = new Console(func.name, Config)
   try {

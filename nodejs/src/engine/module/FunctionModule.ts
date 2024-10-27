@@ -3,7 +3,7 @@ import * as vm from 'node:vm'
 import type { Context, RunningScriptInNewContextOptions, ScriptOptions } from 'node:vm'
 
 import Config from '../../config/Config'
-import { Console } from '../../utils/logger.js'
+import { Console, systemLogger } from '../../utils/logger.js'
 import { FunctionCache } from '../cache/FunctionCache'
 
 interface Module {
@@ -92,7 +92,11 @@ export class FunctionModule {
         // Load and compile module
         const functionData = FunctionCache.get(fn)
         if (!functionData) {
-          throw new Error(`Function ${fn} not found`)
+          systemLogger.warn(
+            `#### Function ${fn} not found, try to load from local and node_modules`,
+          )
+          return require(fn)
+          // throw new Error(`Function ${fn} not found`)
         }
 
         const compiledModule = this.compile(fn, functionData.compiledCode, fromModule)
@@ -256,17 +260,21 @@ export class FunctionModule {
       module: _module,
       exports: _module.exports,
       console: fConsole,
+
       // hack for functions import
       __require: this.functionsImport.bind(this),
+
       RegExp: RegExp,
       Buffer: Buffer,
       Float32Array: Float32Array,
+
       setInterval: setInterval,
       clearInterval: clearInterval,
       setTimeout: setTimeout,
       clearTimeout: clearTimeout,
       setImmediate: setImmediate,
       clearImmediate: clearImmediate,
+
       Promise: Promise,
       process: process,
       URL: URL,

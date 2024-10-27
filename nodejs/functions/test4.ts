@@ -1,4 +1,6 @@
-import Config from 'src/config/Config'
+import Config from '../src/config/Config'
+
+// import Config from '@/src/config/Config'
 
 export default async function (ctx: FunctionContext) {
   console.log('ok')

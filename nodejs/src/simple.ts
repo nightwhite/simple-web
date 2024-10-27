@@ -6,13 +6,13 @@ import type { Express, Request, Response, NextFunction } from 'express'
 import express from 'express'
 import xmlparser from 'express-xml-bodyparser'
 
-import Config from './config/Config.js'
-import { FunctionCache } from './engine/cache/FunctionCache.js'
-import { router } from './handler/router.js'
-import { WebSocketAgent } from './handler/ws.js'
-import type { SimpleWebConfig } from './types/simple-web-config.js'
-import { GetClientIPFromRequest } from './utils/common.js'
-import { systemLogger } from './utils/logger.js'
+import Config from './config/Config'
+import { FunctionCache } from './engine/cache/FunctionCache'
+import { router } from './handler/router'
+import { WebSocketAgent } from './handler/ws'
+import type { SimpleWebConfig } from './types/simple-web-config'
+import { GetClientIPFromRequest } from './utils/common'
+import { systemLogger } from './utils/logger'
 
 dotenv.config()
 

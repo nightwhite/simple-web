@@ -1,5 +1,6 @@
 import * as util from 'util'
 
+// @ts-expect-error Module system mismatch
 import chalk from 'chalk'
 import lodash from 'lodash'
 

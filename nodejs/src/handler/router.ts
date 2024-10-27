@@ -4,9 +4,9 @@ import { Router } from 'express'
 import type { Request, Response } from 'express'
 import multer from 'multer'
 
-import { generateUUID } from '../utils/common.js'
+import { generateUUID } from '../utils/common'
 
-import { handleInvokeFunction } from './invoke.js'
+import { handleInvokeFunction } from './invoke'
 
 /**
  * multer uploader config

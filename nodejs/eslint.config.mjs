@@ -57,6 +57,7 @@ export default [
     files: ['**/*.ts'],
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

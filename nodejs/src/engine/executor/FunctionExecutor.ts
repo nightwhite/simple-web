@@ -1,9 +1,9 @@
 import assert from 'assert'
 
-import { INTERCEPTOR_FUNCTION_NAME } from '../../constants/function-name.js'
-import type { FunctionContext, FunctionResult, IFunctionData } from '../../types/functions.js'
-import { nanosecond2ms } from '../../utils/common.js'
-import { FunctionModule } from '../module/FunctionModule.js'
+import { INTERCEPTOR_FUNCTION_NAME } from '../../constants/function-name'
+import type { FunctionContext, FunctionResult, IFunctionData } from '../../types/functions'
+import { nanosecond2ms } from '../../utils/common'
+import { FunctionModule } from '../module/FunctionModule'
 
 export class FunctionExecutor {
   /**

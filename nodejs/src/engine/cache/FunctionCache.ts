@@ -1,11 +1,11 @@
 import fs from 'fs'
 import path from 'path'
 
-import Config from '../../config/Config.js'
-import type { IFunctionData } from '../../types/functions.js'
-import { compileTs2js } from '../../utils/lang.js'
+import Config from '../../config/Config'
+import type { IFunctionData } from '../../types/functions'
+import { compileTs2js } from '../../utils/lang'
 import { systemLogger } from '../../utils/logger.js'
-import { InitHook } from '../hooks/init-hook.js'
+import { InitHook } from '../hooks/init-hook'
 
 export class FunctionCache {
   private static cache: Map<string, IFunctionData> = new Map()

@@ -1,11 +1,10 @@
 {
   "name": "simple-web23",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "simple backend framework",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
-  "type": "module",
   "files": [
     "dist",
     "README.md",
@@ -23,12 +22,12 @@
   "author": "HUAHUA",
   "license": "ISC",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "node --watch --loader ts-node/esm src/dev.ts",
+    "build": "tsc",
+    "dev": "tsx watch src/dev.ts",
     "start": "node dist/dev.js",
-    "prepublishOnly": "pnpm run build",
+    "prepublishOnly": "npm run build",
     "clean": "rm -rf dist",
-    "prebuild": "pnpm run clean"
+    "prebuild": "npm run clean"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
@@ -44,7 +43,8 @@
     "eslint-plugin-import": "^2.31.0",
     "globals": "^15.11.0",
     "prettier": "^3.3.3",
-    "ts-node": "^10.9.2",
+    "tslib": "^2.8.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.11.0"
   },

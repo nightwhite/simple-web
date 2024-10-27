@@ -2,9 +2,9 @@ import * as path from 'node:path'
 import * as vm from 'node:vm'
 import type { Context, RunningScriptInNewContextOptions, ScriptOptions } from 'node:vm'
 
-import Config from '../../config/Config.js'
+import Config from '../../config/Config'
 import { Console } from '../../utils/logger.js'
-import { FunctionCache } from '../cache/FunctionCache.js'
+import { FunctionCache } from '../cache/FunctionCache'
 
 interface Module {
   exports: Record<string, unknown>
@@ -15,7 +15,7 @@ interface FunctionModuleGlobalContext {
   module: Module
   exports: Module['exports']
   console: Console
-  __require: typeof FunctionModule.require
+  __require: typeof FunctionModule.functionsImport
   RegExp: typeof RegExp
   Buffer: typeof Buffer
   Float32Array: typeof Float32Array
@@ -48,22 +48,23 @@ export class FunctionModule {
       throw new Error('Function name is required')
     }
     const moduleName = `@/${functionName}`
-    return this.require(moduleName, [], '')
+    return this.functionsImport(moduleName, [], '')
   }
 
   /**
    * Require a module by name
    * @param moduleName Module name to require
    * @param fromModule Array of parent module names (for circular dependency detection)
-   * @param currentFileName Current filename
+   * @param filename Current filename
    * @returns Module exports
    * @throws Error if module not found or circular dependency detected
    */
-  static require(
+  static functionsImport(
     moduleName: string,
     fromModule: string[],
-    currentFileName: string,
+    filename: string,
   ): Module['exports'] | void {
+    let currentFileName = filename
     try {
       // Handle cloud SDK imports
       if (moduleName === '@/cloud-sdk') {
@@ -72,9 +73,9 @@ export class FunctionModule {
 
       // Handle relative and absolute paths
       if (this.isLocalModule(moduleName)) {
-        const fn = this.resolveModulePath(moduleName, currentFileName)
+        const fn = this.resolveModulePath(moduleName, filename)
 
-        if (currentFileName === '') {
+        if (filename === '') {
           currentFileName = fn
         }
 
@@ -104,13 +105,14 @@ export class FunctionModule {
         return compiledModule
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      console.log('xxxx')
+
       return require(moduleName)
     } catch (error) {
-      if (currentFileName === '') {
+      if (filename === '') {
         throw new Error(`#### Failed to require module ${currentFileName}: ${error}`)
       } else {
-        throw new Error(`#### ${currentFileName}: Failed to require module ${moduleName}: ${error}`)
+        throw new Error(`#### ${currentFileName} Failed to require module ${moduleName}: ${error}`)
       }
     }
   }
@@ -156,16 +158,25 @@ export class FunctionModule {
   /**
    * Wrap code with require function and module exports
    */
-  private static wrap(code: string): string {
+  protected static wrap(code: string): string {
+    // ensure 1 line to balance line offset of error stack
     return [
-      'function require(name) {',
-      '  __from_modules.push(__filename);',
-      '  return __require(name, __from_modules, __filename);',
-      '}',
-      code,
-      '\nmodule.exports;',
-    ].join('\n')
+      `function require(name){__from_modules.push(__filename);console.log(__filename);return __require(name,__from_modules,__filename);}`,
+      `${code}`,
+      `\nmodule.exports;`,
+    ].join(' ')
   }
+
+  // private static wrap(code: string): string {
+  //   return [
+  //     'function require(name) {',
+  //     '  __from_modules.push(__filename);',
+  //     '  return __require(name, __from_modules, __filename);',
+  //     '}',
+  //     code,
+  //     '\nmodule.exports;',
+  //   ].join('\n')
+  // }
 
   /**
    * Compile function code into a module
@@ -240,22 +251,22 @@ export class FunctionModule {
       module: _module,
       exports: _module.exports,
       console: fConsole,
-      __require: this.require.bind(this),
-      RegExp,
-      Buffer,
-      Float32Array,
-      setInterval,
-      clearInterval,
-      setTimeout,
-      clearTimeout,
-      setImmediate,
-      clearImmediate,
-      Promise,
-      process,
-      URL,
+      __require: this.functionsImport.bind(this),
+      RegExp: RegExp,
+      Buffer: Buffer,
+      Float32Array: Float32Array,
+      setInterval: setInterval,
+      clearInterval: clearInterval,
+      setTimeout: setTimeout,
+      clearTimeout: clearTimeout,
+      setImmediate: setImmediate,
+      clearImmediate: clearImmediate,
+      Promise: Promise,
+      process: process,
+      URL: URL,
       fetch: globalThis.fetch,
       global: null,
-      __from_modules,
+      __from_modules: __from_modules,
     }
 
     sandbox.global = sandbox

@@ -1,2 +1,2 @@
-export * from './functions.js'
-export * from './simple-web-config.js'
+export * from './functions'
+export * from './simple-web-config'

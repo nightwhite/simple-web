@@ -21,9 +21,7 @@ export class SimpleWeb {
   private server!: Server
 
   constructor(private userConfig: SimpleWebConfig = {}) {
-    console.log('1111')
     Config.initialize(userConfig)
-    console.log(Config.WORKSPACE_PATH)
     this.app = express()
     this.setupMiddlewares()
     this.setupRoutes()

@@ -56,12 +56,7 @@ export class FunctionCache {
             code: fileContent,
             compiledCode,
           }
-          // console.log('++++++++++++++++++++++++++++++++++++')
-          console.log(cloudFunction.name)
-          // console.log(cloudFunction.code)
-          // console.log('--------------------------------')
-          // console.log(cloudFunction.compiledCode)
-          // console.log('++++++++++++++++++++++++++++++++++++')
+          systemLogger.info(`Loaded function: ${cloudFunction.name}`)
           FunctionCache.cache.set(cloudFunction.name, cloudFunction)
         }
       }

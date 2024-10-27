@@ -54,7 +54,6 @@ router.all('*', uploader.any(), async (req: Request, res: Response): Promise<voi
   }
 
   req.params.name = funcName
-  console.log('invoke function')
   await handleInvokeFunction(req, res, funcName)
   return
 })

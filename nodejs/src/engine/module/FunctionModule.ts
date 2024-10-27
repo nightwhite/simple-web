@@ -105,8 +105,6 @@ export class FunctionModule {
         return compiledModule
       }
 
-      console.log('xxxx')
-
       return require(moduleName)
     } catch (error) {
       if (filename === '') {
@@ -161,7 +159,7 @@ export class FunctionModule {
   protected static wrap(code: string): string {
     // ensure 1 line to balance line offset of error stack
     return [
-      `function require(name){__from_modules.push(__filename);console.log(__filename);return __require(name,__from_modules,__filename);}`,
+      `function require(name){__from_modules.push(__filename);return __require(name,__from_modules,__filename);}`,
       `${code}`,
       `\nmodule.exports;`,
     ].join(' ')

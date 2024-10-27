@@ -4,6 +4,7 @@ import path from 'path'
 import dotenv from 'dotenv'
 
 import type { SimpleWebConfig } from '../types/simple-web-config'
+import { systemLogger } from '../utils/logger'
 
 dotenv.config()
 
@@ -109,8 +110,8 @@ export default class Config {
       }
 
       if (process.env.DEBUG) {
-        console.log('User Project Root:', this.userProjectRoot)
-        console.log('Config initialized:', this.config)
+        systemLogger.info('User Project Root:', this.userProjectRoot)
+        systemLogger.info('Config initialized:', this.config)
       }
     } catch (error) {
       throw new Error(`Failed to initialize config: ${(error as Error).message}`)
@@ -161,7 +162,7 @@ export default class Config {
       if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive: true })
         if (process.env.DEBUG) {
-          console.log(`Created directory: ${dirPath}`)
+          systemLogger.info(`Created directory: ${dirPath}`)
         }
       }
     } catch (error) {

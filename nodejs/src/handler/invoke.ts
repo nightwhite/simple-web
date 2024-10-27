@@ -73,8 +73,6 @@ async function invokeFunction(ctx: FunctionContext, useInterceptor: boolean): Pr
       if (typeof result.data === 'number') {
         data = Number(result.data).toString()
       }
-      console.log(data)
-      console.log('invoke function send')
       ctx.response!.send(data)
       return
     }

@@ -1,4 +1,3 @@
-import cloud from '@lafjs/cloud'
 import * as _ from 'lodash'
 
 import * as a from './a/b'

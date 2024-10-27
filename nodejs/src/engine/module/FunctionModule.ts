@@ -10,7 +10,7 @@ interface Module {
   exports: Record<string, unknown>
 }
 
-interface FunctionModuleGlobalContext {
+export interface FunctionModuleGlobalContext {
   __filename: string
   module: Module
   exports: Module['exports']
@@ -66,10 +66,10 @@ export class FunctionModule {
   ): Module['exports'] | void {
     let currentFileName = filename
     try {
-      // Handle cloud SDK imports
-      if (moduleName === '@/cloud-sdk') {
-        return
-      }
+      // handle some special imports in functions
+      // if (moduleName === '@/cloud-sdk') {
+      //   return
+      // }
 
       // Handle relative and absolute paths
       if (this.isLocalModule(moduleName)) {
@@ -120,6 +120,13 @@ export class FunctionModule {
    */
   static clearCache(): void {
     this.moduleCache.clear()
+  }
+
+  /**
+   * Get the module cache
+   */
+  static getCache(): Map<string, Module['exports']> {
+    return this.moduleCache
   }
 
   /**

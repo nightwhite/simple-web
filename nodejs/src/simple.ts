@@ -101,7 +101,7 @@ export class SimpleWeb {
     FunctionCache.initialize()
 
     this.server = this.app.listen(Config.PORT, () =>
-      systemLogger.info(`server ${process.pid} listened on ${Config.PORT}`),
+      systemLogger.info(`server listened on ${Config.PORT}, pid: ${process.pid}`),
     )
 
     this.setupWebSocket()

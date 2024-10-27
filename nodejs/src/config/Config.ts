@@ -67,8 +67,6 @@ dotenv.config()
 //   }
 // }
 
-dotenv.config()
-
 /**
  * config manager
  */

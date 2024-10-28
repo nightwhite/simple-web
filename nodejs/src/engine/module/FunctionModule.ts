@@ -117,8 +117,8 @@ export class FunctionModule {
 
       console.log(moduleName)
       console.log(2)
-      // console.log(require.resolve.paths(moduleName))
-      console.log(this.customRequire.resolve.paths(moduleName))
+      console.log(this.customRequire.resolve(moduleName))
+      console.log(require.resolve.paths(moduleName))
       return this.customRequire(moduleName)
       return require(moduleName)
     } catch (error) {

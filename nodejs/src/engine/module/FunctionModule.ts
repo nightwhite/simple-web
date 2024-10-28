@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module'
 import * as path from 'node:path'
 import * as vm from 'node:vm'
 import type { Context, RunningScriptInNewContextOptions, ScriptOptions } from 'node:vm'
@@ -36,6 +37,8 @@ export interface FunctionModuleGlobalContext {
 export class FunctionModule {
   // Cache for loaded modules
   private static moduleCache: Map<string, Module['exports']> = new Map()
+
+  static customRequire = createRequire(Config.PROJECT_ROOT)
 
   /**
    * Get a function module by name
@@ -95,7 +98,10 @@ export class FunctionModule {
           systemLogger.warn(
             `#### Function ${fn} not found, try to load from local and node_modules`,
           )
-          return require(moduleName)
+
+          console.log(1)
+          console.log(this.customRequire.resolve.paths(moduleName))
+          return this.customRequire(moduleName)
           // throw new Error(`Function ${fn} not found`)
         }
 
@@ -109,6 +115,11 @@ export class FunctionModule {
         return compiledModule
       }
 
+      console.log(moduleName)
+      console.log(2)
+      // console.log(require.resolve.paths(moduleName))
+      console.log(this.customRequire.resolve.paths(moduleName))
+      return this.customRequire(moduleName)
       return require(moduleName)
     } catch (error) {
       if (filename === '') {

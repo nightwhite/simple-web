@@ -5,7 +5,7 @@ import path from 'path'
 import fs from 'fs'
 import { compileTs2js } from '../utils'
 
-const WORKSPACE_PATH = path.join(__dirname, '../../functions')
+const WORKSPACE_PATH = path.join(__dirname, '../../../function')
 export class FunctionCache {
   private static cache: Map<string, ICloudFunctionData> = new Map()
 

@@ -1,6 +1,6 @@
 {
   "name": "simple-web23",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "simple backend framework",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -45,19 +45,19 @@
     "globals": "^15.11.0",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
+    "tslib": "^2.8.0",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.11.0"
   },
   "dependencies": {
-    "chalk": "^5.3.0",
+    "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-xml-bodyparser": "^0.3.0",
     "lodash": "^4.17.21",
     "multer": "1.4.5-lts.1",
-    "tslib": "^2.8.0",
     "ws": "^8.18.0"
   },
   "packageManager": "pnpm@9.12.2",

@@ -25,7 +25,8 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/dev.ts"
   ],
   "exclude": [
     "node_modules",

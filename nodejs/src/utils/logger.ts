@@ -1,6 +1,5 @@
 import * as util from 'util'
 
-// @ts-expect-error Module system mismatch
 import chalk from 'chalk'
 import lodash from 'lodash'
 
@@ -17,6 +16,7 @@ const enum LogLevel {
 type LogLevelValue = {
   readonly [K in LogLevel]: number
 }
+
 export class Console {
   protected readonly category: string
   protected readonly config: SimpleWebConfig

@@ -1,5 +1,5 @@
 // import Config from 'src/config/Config'
-import { tee } from 'src/test'
+import { tee } from '../src/test'
 
 // import Config from '@/src/config/Config'
 

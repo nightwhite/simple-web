@@ -74,69 +74,56 @@ export class FunctionModule {
       //   return
       // }
 
+      this.resolveModulePathFromProjectRoot(moduleName, filename)
       // Handle relative and absolute paths
       if (this.isLocalModule(moduleName)) {
-        const fn = this.resolveFunctionsModulePath(moduleName, filename)
+        const functionPath = this.resolveFunctionsModulePath(moduleName, filename)
 
         if (filename === '') {
-          currentFileName = fn
+          currentFileName = functionPath
         }
 
         // Check module cache
-        if (!Config.DISABLE_MODULE_CACHE && this.moduleCache.has(fn)) {
-          return this.moduleCache.get(fn)!
+        if (!Config.DISABLE_MODULE_CACHE && this.moduleCache.has(functionPath)) {
+          return this.moduleCache.get(functionPath)!
         }
 
         // Check circular dependencies
-        if (this.hasCircularDependency(fn, fromModule)) {
-          throw new Error(`Circular dependency detected: ${fromModule.join(' -> ')} -> ${fn}`)
+        if (this.hasCircularDependency(functionPath, fromModule)) {
+          throw new Error(
+            `Circular dependency detected: ${fromModule.join(' -> ')} -> ${functionPath}`,
+          )
         }
 
         // Load and compile module
-        const functionData = FunctionCache.get(fn)
-        if (!functionData) {
+        const functionData = FunctionCache.get(functionPath)
+
+        if (functionData) {
+          const compiledModule = this.compile(functionPath, functionData.compiledCode, fromModule)
+
+          // Cache module if enabled
+          if (!Config.DISABLE_MODULE_CACHE) {
+            this.moduleCache.set(functionPath, compiledModule)
+          }
+
+          return compiledModule
+        } else {
+          const localModulePath = this.resolveModulePathFromProjectRoot(moduleName, filename)
           systemLogger.warn(
-            `#### Function ${fn} not found, try to load from local and node_modules`,
+            `#### Function ${localModulePath} not found, try to load from local and node_modules`,
           )
 
-          console.log(moduleName)
-          console.log(1)
-          console.log('require.resolve')
-          console.log(require.resolve(moduleName))
-          console.log(require.resolve.paths(moduleName))
-          console.log('customRequire.resolve')
-          console.log(this.customRequire.resolve(moduleName))
-          console.log(this.customRequire.resolve.paths(moduleName))
-          console.log('--------------------------------')
           try {
-            return this.customRequire(moduleName)
+            return this.customRequire(localModulePath)
           } catch (error) {
-            throw new Error(
-              `Function ${fn} not found: ${error instanceof Error ? error.message : String(error)}`,
+            systemLogger.warn(
+              `#### Function ${localModulePath} not found in local dir,try found from node_modules, ERR#: ${error instanceof Error ? error.message : String(error)}`,
             )
           }
         }
-
-        const compiledModule = this.compile(fn, functionData.compiledCode, fromModule)
-
-        // Cache module if enabled
-        if (!Config.DISABLE_MODULE_CACHE) {
-          this.moduleCache.set(fn, compiledModule)
-        }
-
-        return compiledModule
       }
 
-      console.log(moduleName)
-      console.log(2)
-      console.log('require.resolve')
-      // console.log(require.resolve(moduleName))
-      console.log(require.resolve.paths(moduleName))
-      console.log('customRequire.resolve')
-      console.log(this.customRequire.resolve(moduleName))
-      console.log(this.customRequire.resolve.paths(moduleName))
-      console.log('--------------------------------')
-      return this.customRequire(moduleName)
+      return require(moduleName)
     } catch (error) {
       if (filename === '') {
         throw new Error(`#### Failed to require module ${currentFileName}: ${error}`)
@@ -176,6 +163,7 @@ export class FunctionModule {
    * @returns The resolved filename of the imported module
    */
   private static resolveFunctionsModulePath(moduleName: string, filename: string): string {
+    // root dir is functions root
     if (moduleName.startsWith('@/')) {
       return moduleName.replace('@/', '')
     }
@@ -185,12 +173,13 @@ export class FunctionModule {
   }
 
   private static resolveModulePathFromProjectRoot(moduleName: string, filename: string): string {
+    // root dir is project root
+    const projectRoot = process.cwd()
     const functionsRoot = Config.WORKSPACE_PATH
     const functionPath = path.join(functionsRoot, filename)
     const functionDirname = path.dirname(functionPath)
     const modulePath = path.join(functionDirname, moduleName)
-    console.log(modulePath)
-    return modulePath.slice(functionsRoot.length)
+    return path.relative(projectRoot, modulePath)
   }
 
   /**

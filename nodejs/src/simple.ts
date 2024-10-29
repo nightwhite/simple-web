@@ -1,7 +1,6 @@
 import type { Server } from 'http'
 
 import cors from 'cors'
-import dotenv from 'dotenv'
 import type { Express, Request, Response, NextFunction } from 'express'
 import express from 'express'
 import xmlparser from 'express-xml-bodyparser'
@@ -13,8 +12,6 @@ import { WebSocketAgent } from './handler/ws'
 import type { SimpleWebConfig } from './types/simple-web-config'
 import { GetClientIPFromRequest } from './utils/common'
 import { systemLogger } from './utils/logger'
-
-dotenv.config()
 
 export class SimpleWeb {
   private app: Express

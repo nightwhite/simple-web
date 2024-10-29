@@ -76,7 +76,7 @@ export class FunctionModule {
 
       // Handle relative and absolute paths
       if (this.isLocalModule(moduleName)) {
-        const fn = this.resolveModulePath(moduleName, filename)
+        const fn = this.resolveFunctionsModulePath(moduleName, filename)
 
         if (filename === '') {
           currentFileName = fn
@@ -99,10 +99,22 @@ export class FunctionModule {
             `#### Function ${fn} not found, try to load from local and node_modules`,
           )
 
+          console.log(moduleName)
           console.log(1)
+          console.log('require.resolve')
+          console.log(require.resolve(moduleName))
+          console.log(require.resolve.paths(moduleName))
+          console.log('customRequire.resolve')
+          console.log(this.customRequire.resolve(moduleName))
           console.log(this.customRequire.resolve.paths(moduleName))
-          return this.customRequire(moduleName)
-          // throw new Error(`Function ${fn} not found`)
+          console.log('--------------------------------')
+          try {
+            return this.customRequire(moduleName)
+          } catch (error) {
+            throw new Error(
+              `Function ${fn} not found: ${error instanceof Error ? error.message : String(error)}`,
+            )
+          }
         }
 
         const compiledModule = this.compile(fn, functionData.compiledCode, fromModule)
@@ -117,10 +129,14 @@ export class FunctionModule {
 
       console.log(moduleName)
       console.log(2)
-      console.log(this.customRequire.resolve(moduleName))
+      console.log('require.resolve')
+      console.log(require.resolve(moduleName))
       console.log(require.resolve.paths(moduleName))
+      console.log('customRequire.resolve')
+      console.log(this.customRequire.resolve(moduleName))
+      console.log(this.customRequire.resolve.paths(moduleName))
+      console.log('--------------------------------')
       return this.customRequire(moduleName)
-      return require(moduleName)
     } catch (error) {
       if (filename === '') {
         throw new Error(`#### Failed to require module ${currentFileName}: ${error}`)
@@ -159,13 +175,22 @@ export class FunctionModule {
    * @param currentFilename The filename of the current module
    * @returns The resolved filename of the imported module
    */
-  private static resolveModulePath(moduleName: string, filename: string): string {
+  private static resolveFunctionsModulePath(moduleName: string, filename: string): string {
     if (moduleName.startsWith('@/')) {
       return moduleName.replace('@/', '')
     }
     const dirname = '/'
     const filePath = path.join(path.dirname(dirname + filename), moduleName)
     return filePath.slice(dirname.length)
+  }
+
+  private static resolveModulePathFromProjectRoot(moduleName: string, filename: string): string {
+    const functionsRoot = Config.WORKSPACE_PATH
+    const functionPath = path.join(functionsRoot, filename)
+    const functionDirname = path.dirname(functionPath)
+    const modulePath = path.join(functionDirname, moduleName)
+    console.log(modulePath)
+    return modulePath.slice(functionsRoot.length)
   }
 
   /**

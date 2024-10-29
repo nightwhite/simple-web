@@ -130,7 +130,7 @@ export class FunctionModule {
       console.log(moduleName)
       console.log(2)
       console.log('require.resolve')
-      console.log(require.resolve(moduleName))
+      // console.log(require.resolve(moduleName))
       console.log(require.resolve.paths(moduleName))
       console.log('customRequire.resolve')
       console.log(this.customRequire.resolve(moduleName))

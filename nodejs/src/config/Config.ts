@@ -70,7 +70,7 @@ dotenv.config()
 /**
  * config manager
  */
-export default class Config {
+export class Config {
   private static config: SimpleWebConfig = {}
   private static userProjectRoot: string = process.cwd()
 
@@ -203,3 +203,5 @@ export default class Config {
     return this.userProjectRoot
   }
 }
+
+export default Config

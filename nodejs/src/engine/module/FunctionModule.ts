@@ -114,6 +114,7 @@ export class FunctionModule {
           )
 
           try {
+            console.log(this.customRequire.resolve.paths(localModulePath))
             return this.customRequire(localModulePath)
           } catch (error) {
             systemLogger.warn(
@@ -122,7 +123,6 @@ export class FunctionModule {
           }
         }
       }
-
       return require(moduleName)
     } catch (error) {
       if (filename === '') {

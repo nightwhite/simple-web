@@ -74,7 +74,6 @@ export class FunctionModule {
       //   return
       // }
 
-      this.resolveModulePathFromProjectRoot(moduleName, filename)
       // Handle relative and absolute paths
       if (this.isLocalModule(moduleName)) {
         const functionPath = this.resolveFunctionsModulePath(moduleName, filename)
@@ -114,7 +113,6 @@ export class FunctionModule {
           )
 
           try {
-            console.log(this.customRequire.resolve.paths(localModulePath))
             return this.customRequire(localModulePath)
           } catch (error) {
             systemLogger.warn(
@@ -123,6 +121,7 @@ export class FunctionModule {
           }
         }
       }
+
       return require(moduleName)
     } catch (error) {
       if (filename === '') {

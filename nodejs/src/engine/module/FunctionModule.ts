@@ -1,4 +1,3 @@
-import { createRequire } from 'node:module'
 import * as path from 'node:path'
 import * as vm from 'node:vm'
 import type { Context, RunningScriptInNewContextOptions, ScriptOptions } from 'node:vm'
@@ -37,8 +36,6 @@ export interface FunctionModuleGlobalContext {
 export class FunctionModule {
   // Cache for loaded modules
   private static moduleCache: Map<string, Module['exports']> = new Map()
-
-  static customRequire = createRequire(Config.PROJECT_ROOT)
 
   /**
    * Get a function module by name
@@ -107,16 +104,38 @@ export class FunctionModule {
 
           return compiledModule
         } else {
-          const localModulePath = this.resolveModulePathFromProjectRoot(moduleName, filename)
+          const localModuleRelativePath = this.resolveModulePathFromProjectRoot(
+            moduleName,
+            filename,
+          )
+
+          const devLocalModuleAbsolutePath = path.join(
+            Config.WORKSPACE_PATH,
+            localModuleRelativePath,
+          )
+
+          const prodLocalModuleAbsolutePath = path.join(
+            `${Config.PROJECT_ROOT}/dist`,
+            localModuleRelativePath,
+          )
+
           systemLogger.warn(
-            `#### Function ${localModulePath} not found, try to load from local and node_modules`,
+            `#### Function ${moduleName} not found, try to load from local and node_modules`,
           )
 
           try {
-            return this.customRequire(localModulePath)
+            return require(prodLocalModuleAbsolutePath)
           } catch (error) {
             systemLogger.warn(
-              `#### Function ${localModulePath} not found in local dir,try found from node_modules, ERR#: ${error instanceof Error ? error.message : String(error)}`,
+              `#### dist # Function ${prodLocalModuleAbsolutePath} not found in local dir,try found from node_modules, ERR#: ${error instanceof Error ? error.message : String(error)}`,
+            )
+          }
+
+          try {
+            return require(devLocalModuleAbsolutePath)
+          } catch (error) {
+            systemLogger.warn(
+              `#### dev # Function ${devLocalModuleAbsolutePath} not found in local dir,try found from node_modules, ERR#: ${error instanceof Error ? error.message : String(error)}`,
             )
           }
         }

@@ -1,6 +1,6 @@
 {
   "name": "simple-web23",
-  "version": "0.0.20",
+  "version": "0.0.23",
   "description": "simple backend framework",
   "main": "dist/dev.js",
   "module": "dist/dev.js",

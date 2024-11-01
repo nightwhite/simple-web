@@ -1,9 +1,9 @@
 {
   "name": "simple-web23",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "simple backend framework",
-  "main": "dist/dev.js",
-  "module": "dist/dev.js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",

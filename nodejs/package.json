@@ -1,6 +1,6 @@
 {
   "name": "simple-web23",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "description": "simple backend framework",
   "main": "dist/index.js",
   "module": "dist/index.js",

@@ -124,16 +124,20 @@ export class FunctionModule {
             return require(prodLocalModuleAbsolutePath)
           } catch (error) {
             systemLogger.warn(
-              `#### dist # Function ${prodLocalModuleAbsolutePath} not found in local dir,try found from node_modules, ERR#: ${error instanceof Error ? error.message : String(error)}`,
+              `#### dist # Function ${prodLocalModuleAbsolutePath} not found in local dir,try found from node_modules. ##`,
             )
+            systemLogger.error(`ERR#: ${error instanceof Error ? error.message : String(error)}`)
+            systemLogger.error(`ERR#: ${error instanceof Error ? error.stack : String(error)}`)
           }
 
           try {
             return require(devLocalModuleAbsolutePath)
           } catch (error) {
             systemLogger.warn(
-              `#### dev # Function ${devLocalModuleAbsolutePath} not found in local dir,try found from node_modules, ERR#: ${error instanceof Error ? error.message : String(error)}`,
+              `#### dev # Function ${devLocalModuleAbsolutePath} not found in local dir,try found from node_modules. ##`,
             )
+            systemLogger.error(`ERR#: ${error instanceof Error ? error.message : String(error)}`)
+            systemLogger.error(`ERR#: ${error instanceof Error ? error.stack : String(error)}`)
           }
         }
       }

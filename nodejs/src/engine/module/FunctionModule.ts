@@ -109,10 +109,7 @@ export class FunctionModule {
             filename,
           )
 
-          const devLocalModuleAbsolutePath = path.join(
-            Config.WORKSPACE_PATH,
-            localModuleRelativePath,
-          )
+          const devLocalModuleAbsolutePath = path.join(Config.PROJECT_ROOT, localModuleRelativePath)
 
           const prodLocalModuleAbsolutePath = path.join(
             `${Config.PROJECT_ROOT}/dist`,

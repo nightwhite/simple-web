@@ -1,17 +1,24 @@
 import type { Server } from 'http'
 
 import cors from 'cors'
-import type { Express, Request, Response, NextFunction } from 'express'
+import type { Express, Response, NextFunction, Request } from 'express'
 import express from 'express'
 import xmlparser from 'express-xml-bodyparser'
 
 import Config from './config/Config'
+import { DatabaseAgent } from './db/db'
 import { FunctionCache } from './engine/cache/FunctionCache'
 import { router } from './handler/router'
 import { WebSocketAgent } from './handler/ws'
 import type { SimpleWebConfig } from './types/simple-web-config'
-import { GetClientIPFromRequest } from './utils/common'
+import { GetClientIPFromRequest, parseToken, splitBearerToken } from './utils/common'
 import { systemLogger } from './utils/logger'
+
+declare module 'express' {
+  export interface Request {
+    user?: any
+  }
+}
 
 export class SimpleWeb {
   private app: Express
@@ -61,6 +68,25 @@ export class SimpleWeb {
     )
 
     this.app.use(xmlparser())
+
+    /**
+     * Parsing bearer token
+     */
+    this.app.use((req: Request, _res: Response, next: NextFunction) => {
+      console.log(req.headers)
+
+      const token = splitBearerToken(req.headers['authorization'] ?? '')
+
+      console.log('token1111:', token)
+
+      const auth = token ? parseToken(token) : null
+
+      console.log('auth:', auth)
+
+      req['user'] = auth
+
+      next()
+    })
   }
 
   private setupRoutes() {
@@ -90,11 +116,13 @@ export class SimpleWeb {
 
   private exit() {
     this.server.close()
+    DatabaseAgent.accessor.close()
     systemLogger.info('simple web exited!')
     process.exit(0)
   }
 
   public start() {
+    DatabaseAgent.initialize()
     FunctionCache.initialize()
 
     this.server = this.app.listen(Config.PORT, () =>
@@ -109,3 +137,4 @@ export class SimpleWeb {
 }
 
 export default SimpleWeb
+

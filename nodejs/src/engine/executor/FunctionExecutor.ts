@@ -1,7 +1,7 @@
 import assert from 'assert'
 
 import { INTERCEPTOR_FUNCTION_NAME } from '../../constants/function-name'
-import type { FunctionContext, FunctionResult, IFunctionData } from '../../types/functions'
+import type { FunctionResult, IFunctionData } from '../../types/functions'
 import { nanosecond2ms } from '../../utils/common'
 import { FunctionModule } from '../module/FunctionModule'
 

@@ -12,24 +12,26 @@ export interface IFunctionData {
 /**
  * ctx passed to function
  */
-export interface FunctionContext {
-  files?:
-    | {
-        [fieldname: string]: Express.Multer.File[]
-      }
-    | Express.Multer.File[]
-    | undefined
-  headers?: Request['headers']
-  query?: Request['query']
-  body?: Request['body']
-  params?: Request['params']
-  method?: Request['method']
-  webSocket?: WebSocket
-  request?: Request
-  response?: Response
-  __function_name?: string
-  requestId?: string
-  url?: string
+declare global {
+  interface FunctionContext {
+    files?:
+      | {
+          [fieldname: string]: Express.Multer.File[]
+        }
+      | Express.Multer.File[]
+      | undefined
+    headers?: Request['headers']
+    query?: Request['query']
+    body?: Request['body']
+    params?: Request['params']
+    method?: Request['method']
+    webSocket?: WebSocket
+    request?: Request
+    response?: Response
+    __function_name?: string
+    requestId?: string
+    url?: string
+  }
 }
 
 /**

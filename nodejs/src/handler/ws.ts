@@ -4,7 +4,6 @@ import { WebSocketServer } from 'ws'
 
 import { WEBSOCKET_FUNCTION_NAME } from '../constants/function-name'
 import { FunctionModule } from '../engine/module/FunctionModule'
-import type { FunctionContext } from '../types/functions'
 import { generateUUID } from '../utils/common'
 import { systemLogger } from '../utils/logger'
 

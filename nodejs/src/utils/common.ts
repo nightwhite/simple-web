@@ -1,6 +1,9 @@
 import * as crypto from 'crypto'
 
 import type { Request } from 'express'
+import * as jwt from 'jsonwebtoken'
+
+import Config from '../config/Config'
 
 /**
  * Generate UUID v4
@@ -65,4 +68,48 @@ export function GetClientIPFromRequest(req: Request) {
   }
 
   return null
+}
+
+/**
+ * split bearer token
+ * @param bearer "Bearer xxxxx"
+ * @returns
+ */
+export function splitBearerToken(bearer: string): string | null {
+  if (!bearer) return null
+
+  const splitted = bearer?.split(' ')
+  const token = splitted?.length === 2 ? splitted[1] : null
+  return token
+}
+
+/**
+ * Parse a JWT token
+ * @param token
+ * @returns
+ */
+export function parseToken(token: string, secret?: string): any | null {
+  if (!token) return null
+
+  console.log('SERVER_SECRET:', secret ?? Config.SERVER_SECRET, token)
+
+  try {
+    const ret = jwt.verify(token, secret ?? Config.SERVER_SECRET)
+
+    console.log('parseToken ret:', ret)
+    return ret
+  } catch (error) {
+    console.log('parseToken error:', error)
+    return null
+  }
+}
+
+/**
+ * Generate a JWT token
+ * @param payload
+ * @param expire second
+ * @returns
+ */
+export function getToken(payload: any, secret?: string): string {
+  return jwt.sign(payload, secret ?? Config.SERVER_SECRET)
 }

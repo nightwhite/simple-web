@@ -142,7 +142,7 @@ export class Config {
         return resolvedPath
       }
 
-      // 3. 默认路径: 用户项目下的 functions 目录
+      // 3. 默认路径：用户项目下的 functions 目录
       const defaultPath = path.join(this.userProjectRoot, 'functions')
       this.ensureDirectoryExists(defaultPath)
       return defaultPath
@@ -165,6 +165,24 @@ export class Config {
     } catch (error) {
       throw new Error(`Failed to create directory ${dirPath}: ${(error as Error).message}`)
     }
+  }
+
+  /**
+   * mongodb connection configuration
+   */
+  static get DB_URI() {
+    return process.env['DB_URI'] || null
+  }
+
+  /**
+   * the server secret salt, mainly used for generating tokens
+   */
+  static get SERVER_SECRET(): string {
+    const secret_salt = process.env['SERVER_SECRET']
+    if (!secret_salt) {
+      throw new Error('env: `SERVER_SECRET` is missing')
+    }
+    return secret_salt
   }
 
   static get PORT(): number {

@@ -144,8 +144,9 @@ export class FunctionModule {
 
       return require(moduleName)
     } catch (error) {
+      console.log('####', currentFileName, moduleName, error)
       if (filename === '') {
-        throw new Error(`#### Failed to require module ${currentFileName}: ${error}`)
+        throw new Error(`#### Failed1111111 to require module ${currentFileName}: ${error}`)
       } else {
         throw new Error(`#### ${currentFileName} Failed to require module ${moduleName}: ${error}`)
       }

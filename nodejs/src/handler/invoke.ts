@@ -38,6 +38,8 @@ async function invokeFunction(ctx: FunctionContext, useInterceptor: boolean): Pr
 
   const name = ctx.__function_name
 
+  ctx.user = ctx.request?.user
+
   let func = FunctionCache.get(name!)
   if (!func) {
     func = FunctionCache.get(DEFAULT_FUNCTION_NAME)

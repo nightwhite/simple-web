@@ -30,6 +30,7 @@
   "include": [
     "src/**/*",
     "src/dev.ts",
+    "functions/**/*"
   ],
   "exclude": [
     "node_modules",

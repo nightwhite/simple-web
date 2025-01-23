@@ -4,7 +4,6 @@ import Config from '../config/Config'
 import { DEFAULT_FUNCTION_NAME, INTERCEPTOR_FUNCTION_NAME } from '../constants/function-name'
 import { FunctionCache } from '../engine/cache/FunctionCache'
 import { FunctionExecutor } from '../engine/executor/FunctionExecutor'
-import type { FunctionContext } from '../types/functions'
 import { generateUUID } from '../utils/common'
 import { Console } from '../utils/logger'
 
